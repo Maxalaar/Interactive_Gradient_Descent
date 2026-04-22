@@ -168,7 +168,8 @@ def register_paths_management(app) -> None:
         Input("landscape-visible-store", "data"),
         State("surface", "figure"),
         State("surface", "relayoutData"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
+        unning=[(Output("cursor-state", "data"), "busy", "idle")],
     )
     def update_figure_from_paths(paths, landscape_visible, current_figure, relayoutData):
         if current_figure is None:
