@@ -2,8 +2,8 @@ import torch
 import numpy as np
 from typing import List
 
-from python.loss_function import LossFunction
-from python.optimizer import Optimizer
+from loss_function import LossFunction
+from optimizer import Optimizer
 
 
 def compute_optimization_path(

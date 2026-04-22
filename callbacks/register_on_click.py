@@ -4,8 +4,8 @@ from typing import Optional
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from python.compute_optimization_path import compute_optimization_path
-from python.constants import DEFAULT_PATH_COLOR
+from compute_optimization_path import compute_optimization_path
+from constants import DEFAULT_PATH_COLOR
 
 
 def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:

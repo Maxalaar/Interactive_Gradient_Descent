@@ -1,6 +1,6 @@
 from dash import Input, Output
 
-from python.constants import LANDSCAPE_SHOW
+from constants import LANDSCAPE_SHOW
 
 
 def register_toggle_loss_landscape_visibility(app) -> None:

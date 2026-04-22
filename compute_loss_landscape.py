@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from typing import Optional, Tuple
 
-from python.loss_function import LossFunction
+from loss_function import LossFunction
 
 
 def compute_loss_landscape(

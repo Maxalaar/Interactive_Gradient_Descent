@@ -3,9 +3,9 @@ import copy
 from dash import Input, Output, State, no_update
 from dash.exceptions import PreventUpdate
 
-from python.build_surface import build_surface
-from python.compute_loss_landscape import compute_loss_landscape
-from python.constants import LANDSCAPE_SHOW, LOSS_LANDSCAPE_TRACE_NAME
+from build_surface import build_surface
+from compute_loss_landscape import compute_loss_landscape
+from constants import LANDSCAPE_SHOW, LOSS_LANDSCAPE_TRACE_NAME
 
 
 def register_update_loss_landscape(app, loss_functions: dict, default_sample_number: int) -> None:

@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from dash import Input, Output, State, dcc, html
 from dash.exceptions import PreventUpdate
 
-from python.constants import DEFAULT_PATH_COLOR, LANDSCAPE_SHOW, LOSS_LANDSCAPE_TRACE_NAME
+from constants import DEFAULT_PATH_COLOR, LANDSCAPE_SHOW, LOSS_LANDSCAPE_TRACE_NAME
 
 
 # ---------------------------------------------------------------------------

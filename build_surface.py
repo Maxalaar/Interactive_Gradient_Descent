@@ -1,7 +1,7 @@
 import numpy as np
 import plotly.graph_objects as go
 
-from python.constants import LOSS_LANDSCAPE_TRACE_NAME
+from constants import LOSS_LANDSCAPE_TRACE_NAME
 
 
 def build_surface(X: np.ndarray, Y: np.ndarray, Z: np.ndarray) -> go.Figure:

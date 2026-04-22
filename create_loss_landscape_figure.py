@@ -1,9 +1,9 @@
 import numpy as np
 
-from python.build_surface import build_surface
-from python.compute_loss_landscape import compute_loss_landscape
-from python.constants import LANDSCAPE_SHOW, LOSS_LANDSCAPE_TRACE_NAME
-from python.loss_function import LossFunction
+from build_surface import build_surface
+from compute_loss_landscape import compute_loss_landscape
+from constants import LANDSCAPE_SHOW, LOSS_LANDSCAPE_TRACE_NAME
+from loss_function import LossFunction
 
 
 def create_loss_landscape_figure(

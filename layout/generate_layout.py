@@ -1,8 +1,8 @@
 from dash import html
 
-from python.create_loss_landscape_figure import create_loss_landscape_figure
-from python.layout.create_graphs_panel import create_graphs_panel
-from python.layout.create_options_panel import create_options_panel
+from create_loss_landscape_figure import create_loss_landscape_figure
+from layout.create_graphs_panel import create_graphs_panel
+from layout.create_options_panel import create_options_panel
 
 def generate_layout(loss_functions, optimizers, default_sample_number):
     first_function_name = list(loss_functions.keys())[0]

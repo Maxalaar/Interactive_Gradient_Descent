@@ -1,6 +1,6 @@
 from dash import dcc, html
 
-from python.constants import (
+from constants import (
     LANDSCAPE_SHOW,
     LANDSCAPE_VISIBLE_STORE_ID,
     LOSS_NAME_STORE_ID,

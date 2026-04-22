@@ -1,12 +1,12 @@
 import torch
 from dash import Dash
-from python.layout.generate_layout import generate_layout
-from python.loss_function import (
+from layout.generate_layout import generate_layout
+from loss_function import (
     Rosenbrock, Himmelblau, Beale, Booth, Matyas,
     Ackley, Rastrigin, ThreeHumpCamel, Eggholder
 )
-from python.optimizer import SGD, Adam
-from python.callbacks.register_callbacks import register_callbacks
+from optimizer import SGD, Adam
+from callbacks.register_callbacks import register_callbacks
 
 loss_functions = {
     "Rosenbrock": Rosenbrock(),
