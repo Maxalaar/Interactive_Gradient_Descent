@@ -1,4 +1,6 @@
 dash
+dash[diskcache]
+dash-extensions
 diskcache
 numpy
 plotly
