@@ -166,30 +166,42 @@ def register_paths_management(app) -> None:
         Output("surface", "figure", allow_duplicate=True),
         Input("paths-store", "data"),
         Input("landscape-visible-store", "data"),
-        State("surface", "figure"), State("surface", "relayoutData"),
+        State("surface", "figure"),
+        State("surface", "relayoutData"),
         prevent_initial_call=True
     )
     def update_figure_from_paths(paths, landscape_visible, current_figure, relayoutData):
-        if current_figure is None: raise PreventUpdate
-        new_figure = copy.deepcopy(current_figure)
-        preserve_camera_state(new_figure, relayoutData)
+        if current_figure is None:
+            raise PreventUpdate
 
-        landscape_trace = next((t for t in new_figure["data"] if t.get("name") == LOSS_LANDSCAPE_TRACE_NAME), None)
-        new_figure["data"] = []
-        if landscape_trace:
-            landscape_trace["visible"] = (landscape_visible == LANDSCAPE_SHOW)
-            new_figure["data"].append(landscape_trace)
+        # Update camera in-place (safe, avoids extra dict creation)
+        preserve_camera_state(current_figure, relayoutData)
 
+        new_data = []
+
+        # 1️⃣ REUSE the landscape trace object.
+        # Plotly.js will skip re-rendering it if the reference/structure is unchanged.
+        for trace in current_figure["data"]:
+            if trace.get("name") == LOSS_LANDSCAPE_TRACE_NAME:
+                trace["visible"] = (landscape_visible == LANDSCAPE_SHOW)
+                new_data.append(trace)
+                break
+
+        # 2️⃣ Build ONLY the path traces (lightweight dicts)
         for path in (paths or []):
             if path.get("visible", True) and path.get("data"):
-                new_figure["data"].append(go.Scatter3d(
-                    x=path["data"]["x"],
-                    y=path["data"]["y"],
-                    z=path["data"]["z"],
-                    mode="markers+lines",
-                    marker=dict(size=3, color=path.get("color", DEFAULT_PATH_COLOR)),
-                    line=dict(color=path.get("color", DEFAULT_PATH_COLOR), width=2),
-                    name=path.get("name", "Path")
-                ).to_plotly_json())
+                color = path.get("color", DEFAULT_PATH_COLOR)
+                new_data.append({
+                    "type": "scatter3d",
+                    "x": path["data"]["x"],
+                    "y": path["data"]["y"],
+                    "z": path["data"]["z"],
+                    "mode": "markers+lines",
+                    "marker": {"size": 3, "color": color},
+                    "line": {"color": color, "width": 2},
+                    "name": path.get("name", "Path")
+                })
 
-        return new_figure
+        # Return a new figure dict. Reusing current_figure["layout"] avoids
+        # serializing layout props and camera state again.
+        return {"data": new_data, "layout": current_figure["layout"]}
