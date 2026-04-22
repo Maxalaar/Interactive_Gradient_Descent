@@ -1,4 +1,4 @@
-import torch
+import os
 from dash import Dash
 from layout.generate_layout import generate_layout
 from loss_function import (
@@ -30,4 +30,11 @@ if __name__ == "__main__":
     default_sample_number = 100
     app.layout = generate_layout(loss_functions, optimizers, default_sample_number)
     register_callbacks(app, loss_functions, optimizers, default_sample_number)
-    app.run(debug=True)
+
+    is_production = os.environ.get("RENDER") is not None
+
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 8050)),
+        debug=not is_production
+    )
