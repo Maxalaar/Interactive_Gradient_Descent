@@ -13,8 +13,10 @@ from preserve_camera_state import preserve_camera_state
 
 _HEX_RE = re.compile(r'^#[0-9a-fA-F]{6}$')
 
+
 def _is_valid_hex(value: str) -> bool:
     return bool(value and _HEX_RE.match(value))
+
 
 def _get_triggered_id(ctx) -> Optional[Dict[str, Any]]:
     if not ctx.triggered:
@@ -23,6 +25,7 @@ def _get_triggered_id(ctx) -> Optional[Dict[str, Any]]:
         return json.loads(ctx.triggered[0]["prop_id"].split(".")[0])
     except (json.JSONDecodeError, ValueError):
         return None
+
 
 def _build_path_row(path: Dict[str, Any]) -> html.Div:
     pid = path["id"]
@@ -51,7 +54,8 @@ def register_paths_management(app) -> None:
     @app.callback(Output("paths-list", "children"), Input("paths-store", "data"))
     def build_paths_list(paths: List[Dict]):
         return html.Div("No paths yet. Click on the surface to add one.",
-                        style={"color": "gray", "fontStyle": "italic"}) if not paths else [_build_path_row(p) for p in paths]
+                        style={"color": "gray", "fontStyle": "italic"}) if not paths else [_build_path_row(p) for p in
+                                                                                           paths]
 
     @app.callback(
         Output("paths-store", "data", allow_duplicate=True),
@@ -60,10 +64,18 @@ def register_paths_management(app) -> None:
     )
     def update_path_name(_, paths):
         ctx = dash.callback_context
-        trigger = _get_triggered_id(ctx)
-        if not trigger or trigger.get("type") != "path-name" or not paths:
+        if not ctx.triggered or not paths:
             raise PreventUpdate
-        return [{**p, "name": ctx.triggered[0]["value"]} if p["id"] == trigger["index"] else p for p in paths]
+
+        trigger = _get_triggered_id(ctx)
+        if not trigger or trigger.get("type") != "path-name":
+            raise PreventUpdate
+
+        new_value = ctx.triggered[0].get("value")
+        if new_value is None:  # Ignore phantom triggers on component creation
+            raise PreventUpdate
+
+        return [{**p, "name": new_value} if p["id"] == trigger["index"] else p for p in paths]
 
     @app.callback(
         Output("paths-store", "data", allow_duplicate=True),
@@ -72,13 +84,18 @@ def register_paths_management(app) -> None:
     )
     def update_path_color(_, paths):
         ctx = dash.callback_context
+        if not ctx.triggered or not paths:
+            raise PreventUpdate
+
         trigger = _get_triggered_id(ctx)
-        if not trigger or trigger.get("type") != "path-color" or not paths:
+        if not trigger or trigger.get("type") != "path-color":
             raise PreventUpdate
-        new_color = ctx.triggered[0]["value"]
-        if not _is_valid_hex(new_color):
+
+        new_value = ctx.triggered[0].get("value")
+        if not _is_valid_hex(new_value):
             raise PreventUpdate
-        return [{**p, "color": new_color} if p["id"] == trigger["index"] else p for p in paths]
+
+        return [{**p, "color": new_value} if p["id"] == trigger["index"] else p for p in paths]
 
     @app.callback(
         Output({"type": "path-color-swatch", "index": dash.dependencies.MATCH}, "style"),
@@ -98,10 +115,18 @@ def register_paths_management(app) -> None:
     )
     def update_path_visible(_, paths):
         ctx = dash.callback_context
-        trigger = _get_triggered_id(ctx)
-        if not trigger or trigger.get("type") != "path-visible" or not paths:
+        if not ctx.triggered or not paths:
             raise PreventUpdate
-        new_visible = "visible" in (ctx.triggered[0]["value"] or [])
+
+        trigger = _get_triggered_id(ctx)
+        if not trigger or trigger.get("type") != "path-visible":
+            raise PreventUpdate
+
+        new_value = ctx.triggered[0].get("value")
+        if new_value is None:  # Guard against initial render
+            raise PreventUpdate
+
+        new_visible = "visible" in new_value
         return [{**p, "visible": new_visible} if p["id"] == trigger["index"] else p for p in paths]
 
     @app.callback(
@@ -110,13 +135,19 @@ def register_paths_management(app) -> None:
         State("paths-store", "data"), prevent_initial_call=True
     )
     def delete_path(clicks_list, paths):
-        if not clicks_list or not paths:
+        ctx = dash.callback_context
+        if not ctx.triggered or not paths:
             raise PreventUpdate
-        trigger = _get_triggered_id(dash.callback_context)
-        if trigger:
+
+        # Crucial fix: ignore triggers where n_clicks is 0 (default on component insertion)
+        trigger_val = ctx.triggered[0].get("value", 0)
+        if trigger_val == 0:
+            raise PreventUpdate
+
+        trigger = _get_triggered_id(ctx)
+        if trigger and trigger.get("type") == "path-delete":
             return [p for p in paths if p["id"] != trigger["index"]]
-        else:
-            raise PreventUpdate
+        raise PreventUpdate
 
     @app.callback(
         Output("surface", "figure", allow_duplicate=True),
@@ -143,7 +174,6 @@ def register_paths_management(app) -> None:
         new_figure = copy.deepcopy(current_figure)
         preserve_camera_state(new_figure, relayoutData)
 
-        # Reset data, keep landscape trace if it exists
         landscape_trace = next((t for t in new_figure["data"] if t.get("name") == LOSS_LANDSCAPE_TRACE_NAME), None)
         new_figure["data"] = []
         if landscape_trace:
