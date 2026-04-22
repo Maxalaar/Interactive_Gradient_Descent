@@ -10,9 +10,11 @@ from constants import DEFAULT_PATH_COLOR
 
 
 def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
+
     @app.callback(
         Output("paths-store", "data", allow_duplicate=True),
         Output("last-click-time", "data", allow_duplicate=True),
+        Output("path-counter-store", "data", allow_duplicate=True),
         Input("surface", "clickData"),
         State("loss-name", "data"),
         State("optimizer-name", "value"),
@@ -20,6 +22,7 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         State("iterations", "value"),
         State("paths-store", "data"),
         State("last-click-time", "data"),
+        State("path-counter-store", "data"),
         prevent_initial_call=True,
     )
     def on_click(
@@ -30,6 +33,7 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         iterations,
         current_paths,
         last_click_time,
+        path_counter,
     ):
         if clickData is None or loss_name is None:
             raise PreventUpdate
@@ -62,9 +66,10 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
             iteration_number=iterations,
         )
 
+        new_counter = (path_counter or 0) + 1
         new_path = {
             "id": str(uuid.uuid4()),
-            "name": f"Path {len(current_paths or []) + 1}",
+            "name": f"Path {new_counter}",
             "color": DEFAULT_PATH_COLOR,
             "visible": True,
             "data": {
@@ -75,4 +80,4 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         }
 
         updated_paths = list(current_paths or []) + [new_path]
-        return updated_paths, now
+        return updated_paths, now, new_counter

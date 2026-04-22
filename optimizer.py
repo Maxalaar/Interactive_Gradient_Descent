@@ -9,7 +9,7 @@ class Optimizer(ABC):
 
     def __init__(self) -> None:
         self.default_lr: float = 0.01
-        self.default_iterations: int = 100
+        self.default_iterations: int = 10
         self.name: str = ""
 
     @abstractmethod
@@ -45,7 +45,7 @@ class SGD(Optimizer):
         super().__init__()
         self.name = "SGD"
         self.default_lr = 0.00001
-        self.default_iterations = 100
+        self.default_iterations = 10
         self.momentum = momentum
 
     def create_optimizer(
@@ -68,7 +68,7 @@ class Adam(Optimizer):
         super().__init__()
         self.name = "Adam"
         self.default_lr = 0.1
-        self.default_iterations = 100
+        self.default_iterations = 10
         self.betas = betas
 
     def create_optimizer(

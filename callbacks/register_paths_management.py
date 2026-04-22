@@ -213,6 +213,7 @@ def _register_clear_paths(app) -> None:
     @app.callback(
         Output("surface", "figure", allow_duplicate=True),
         Output("paths-store", "data", allow_duplicate=True),
+        Output("path-counter-store", "data", allow_duplicate=True),
         Input("clear-paths-button", "n_clicks"),
         State("surface", "figure"),
         State("surface", "relayoutData"),
@@ -225,7 +226,7 @@ def _register_clear_paths(app) -> None:
         if relayoutData and "scene.camera" in relayoutData:
             figure["layout"]["scene"]["camera"] = relayoutData["scene.camera"]
 
-        return figure, []
+        return figure, [], 0
 
 
 def _register_update_figure_from_paths(app) -> None:

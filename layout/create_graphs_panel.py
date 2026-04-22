@@ -5,8 +5,8 @@ def create_graphs_panel(loss_landscape_surface):
         dcc.Graph(
             id="surface",
             figure=loss_landscape_surface,
+            config={"scrollZoom": True, "displayModeBar": True, "staticPlot": False},
             style={'height': '100%', 'width': '100%'},
-            config={'responsive': True}
         ),
     ], style={
         'flex': '1',
@@ -14,5 +14,5 @@ def create_graphs_panel(loss_landscape_surface):
         'display': 'flex',
         'flexDirection': 'column',
         'minHeight': 0,
-        'height': '100%',    # Force la hauteur à 100% du parent
+        'height': '100%',
     })

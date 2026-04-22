@@ -13,6 +13,7 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
         Output("surface", "figure", allow_duplicate=True),
         Output("paths-store", "data", allow_duplicate=True),
         Output("loss-name", "data"),
+        Output("path-counter-store", "data", allow_duplicate=True),
         Input("update-loss-landscape-button", "n_clicks"),
         State("loss-function-dropdown", "value"),
         State("x-min", "value"),
@@ -60,10 +61,7 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
         z_min, z_max = float(Z.min()), float(Z.max())
         padding = (z_max - z_min) * 0.05
 
-        # ------------------------------------------------------------------
-        # Same loss function — update the surface data in-place so the camera
-        # position and existing paths are preserved.
-        # ------------------------------------------------------------------
+        # Same loss function — update surface in-place, preserve camera and paths
         if current_figure is not None and stored_loss_name == loss_name:
             updated_figure = copy.deepcopy(current_figure)
 
@@ -79,11 +77,9 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
             updated_figure["layout"]["scene"]["yaxis"]["range"] = [y_min, y_max]
             updated_figure["layout"]["scene"]["zaxis"]["range"] = [z_min - padding, z_max + padding]
 
-            return updated_figure, no_update, stored_loss_name
+            return updated_figure, no_update, stored_loss_name, no_update
 
-        # ------------------------------------------------------------------
-        # Loss function changed — rebuild from scratch and clear paths.
-        # ------------------------------------------------------------------
+        # Loss function changed — rebuild from scratch, clear paths and reset counter
         figure = build_surface(X, Y, Z).to_dict()
         figure["layout"]["scene"]["xaxis"]["range"] = [x_min, x_max]
         figure["layout"]["scene"]["yaxis"]["range"] = [y_min, y_max]
@@ -94,4 +90,4 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
                 trace["visible"] = True
                 break
 
-        return figure, [], loss_name
+        return figure, [], loss_name, 0
