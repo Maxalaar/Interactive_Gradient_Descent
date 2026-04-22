@@ -1,4 +1,4 @@
 dash
-torch
 numpy
 plotly
+torch --index-url https://download.pytorch.org/whl/cpu
