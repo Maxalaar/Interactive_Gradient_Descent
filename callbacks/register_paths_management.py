@@ -218,14 +218,21 @@ def _register_delete_path(app) -> None:
 
 def _register_clear_paths(app) -> None:
     @app.callback(
+        Output("surface", "figure", allow_duplicate=True),
         Output("paths-store", "data", allow_duplicate=True),
         Input("clear-paths-button", "n_clicks"),
+        State("surface", "figure"),
+        State("surface", "relayoutData"),
         prevent_initial_call=True,
     )
-    def clear_all_paths(n_clicks):
+    def clear_all_paths(n_clicks, figure, relayoutData):
         if not n_clicks:
             raise PreventUpdate
-        return []
+
+        if relayoutData and "scene.camera" in relayoutData:
+            figure["layout"]["scene"]["camera"] = relayoutData["scene.camera"]
+
+        return figure, []
 
 
 def _register_update_figure_from_paths(app) -> None:

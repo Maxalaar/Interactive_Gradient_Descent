@@ -129,6 +129,7 @@ def create_options_panel(
         dcc.Store(id=PATHS_STORE_ID, data=[]),
         dcc.Store(id=LANDSCAPE_VISIBLE_STORE_ID, data=LANDSCAPE_SHOW),
         dcc.Store(id=LOSS_NAME_STORE_ID, data=first_function_name),
+        dcc.Store(id="last-click-time", data=0),
 
     ], style={
         "flex": "0 0 280px",

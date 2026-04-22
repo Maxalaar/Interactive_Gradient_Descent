@@ -1,4 +1,5 @@
 import uuid
+import time
 from typing import Optional
 
 from dash import Input, Output, State
@@ -12,6 +13,7 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
     @app.callback(
         Output("surface", "figure", allow_duplicate=True),
         Output("paths-store", "data", allow_duplicate=True),
+        Output("last-click-time", "data", allow_duplicate=True),
         Input("surface", "clickData"),
         State("surface", "figure"),
         State("surface", "relayoutData"),
@@ -20,6 +22,7 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         State("learning-rate", "value"),
         State("iterations", "value"),
         State("paths-store", "data"),
+        State("last-click-time", "data"),
         prevent_initial_call=True,
     )
     def on_click(
@@ -31,8 +34,13 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         learning_rate,
         iterations,
         current_paths,
+        last_click_time,
     ):
         if clickData is None or loss_name is None:
+            raise PreventUpdate
+
+        now = time.time()
+        if now - last_click_time < 0.25:
             raise PreventUpdate
 
         loss_function = loss_functions[loss_name]
@@ -75,4 +83,4 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         }
 
         updated_paths = list(current_paths or []) + [new_path]
-        return figure, updated_paths
+        return figure, updated_paths, now
