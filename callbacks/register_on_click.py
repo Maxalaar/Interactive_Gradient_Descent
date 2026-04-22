@@ -30,7 +30,7 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         running=[
             (Output("cursor-state", "data"), "busy", "idle")
         ],
-        background=True,
+        # background=True,
         prevent_initial_call=True,
     )
     def on_click(

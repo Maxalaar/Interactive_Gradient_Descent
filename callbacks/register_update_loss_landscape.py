@@ -30,7 +30,7 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
             State("loss-name", "data"),
         ],
         running=[(Output("cursor-state", "data"), "busy", "idle")],
-        background=True,
+        # background=True,
         prevent_initial_call=True,
     )
     def update_landscape(
