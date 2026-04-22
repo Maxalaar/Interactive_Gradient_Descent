@@ -1,5 +1,8 @@
 import os
 from dash import Dash
+from dash.background_callback.managers.diskcache_manager import DiskcacheLongCallbackManager
+from diskcache import Cache
+
 from layout.generate_layout import generate_layout
 from loss_function import (
     Rosenbrock, Himmelblau, Beale, Booth, Matyas,
@@ -26,7 +29,12 @@ optimizers = {
 }
 
 if __name__ == "__main__":
-    app = Dash(__name__)
+    # Configuration du gestionnaire pour les callbacks background
+    cache = Cache("./.diskcache")
+    background_callback_manager = DiskcacheLongCallbackManager(cache)
+
+    app = Dash(__name__, background_callback_manager=background_callback_manager)
+
     default_sample_number = 100
     app.layout = generate_layout(loss_functions, optimizers, default_sample_number)
     register_callbacks(app, loss_functions, optimizers, default_sample_number)

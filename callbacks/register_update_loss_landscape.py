@@ -9,22 +9,31 @@ from constants import LANDSCAPE_SHOW, LOSS_LANDSCAPE_TRACE_NAME
 
 
 def register_update_loss_landscape(app, loss_functions: dict, default_sample_number: int) -> None:
+
     @app.callback(
-        Output("surface", "figure", allow_duplicate=True),
-        Output("paths-store", "data", allow_duplicate=True),
-        Output("loss-name", "data"),
-        Output("path-counter-store", "data", allow_duplicate=True),
-        Input("update-loss-landscape-button", "n_clicks"),
-        State("loss-function-dropdown", "value"),
-        State("x-min", "value"),
-        State("x-max", "value"),
-        State("y-min", "value"),
-        State("y-max", "value"),
-        State("sample-number", "value"),
-        State("show-loss-landscape-toggle", "value"),
-        State("surface", "figure"),
-        State("paths-store", "data"),
-        State("loss-name", "data"),
+        output=[
+            Output("surface", "figure", allow_duplicate=True),
+            Output("paths-store", "data", allow_duplicate=True),
+            Output("loss-name", "data"),
+            Output("path-counter-store", "data", allow_duplicate=True),
+        ],
+        inputs=[
+            Input("update-loss-landscape-button", "n_clicks"),
+            State("loss-function-dropdown", "value"),
+            State("x-min", "value"),
+            State("x-max", "value"),
+            State("y-min", "value"),
+            State("y-max", "value"),
+            State("sample-number", "value"),
+            State("show-loss-landscape-toggle", "value"),
+            State("surface", "figure"),
+            State("paths-store", "data"),
+            State("loss-name", "data"),
+        ],
+        running=[
+            (Output("cursor-state", "data"), "busy", "idle")
+        ],
+        background=True,
         prevent_initial_call=True,
     )
     def update_landscape(

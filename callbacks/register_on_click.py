@@ -12,17 +12,25 @@ from constants import DEFAULT_PATH_COLOR
 def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
 
     @app.callback(
-        Output("paths-store", "data", allow_duplicate=True),
-        Output("last-click-time", "data", allow_duplicate=True),
-        Output("path-counter-store", "data", allow_duplicate=True),
-        Input("surface", "clickData"),
-        State("loss-name", "data"),
-        State("optimizer-name", "value"),
-        State("learning-rate", "value"),
-        State("iterations", "value"),
-        State("paths-store", "data"),
-        State("last-click-time", "data"),
-        State("path-counter-store", "data"),
+        output=[
+            Output("paths-store", "data", allow_duplicate=True),
+            Output("last-click-time", "data", allow_duplicate=True),
+            Output("path-counter-store", "data", allow_duplicate=True),
+        ],
+        inputs=[
+            Input("surface", "clickData"),
+            State("loss-name", "data"),
+            State("optimizer-name", "value"),
+            State("learning-rate", "value"),
+            State("iterations", "value"),
+            State("paths-store", "data"),
+            State("last-click-time", "data"),
+            State("path-counter-store", "data"),
+        ],
+        running=[
+            (Output("cursor-state", "data"), "busy", "idle")
+        ],
+        background=True,
         prevent_initial_call=True,
     )
     def on_click(

@@ -130,7 +130,8 @@ def create_options_panel(
         dcc.Store(id=LANDSCAPE_VISIBLE_STORE_ID, data=LANDSCAPE_SHOW),
         dcc.Store(id=LOSS_NAME_STORE_ID, data=first_function_name),
         dcc.Store(id="last-click-time", data=0),
-        dcc.Store(id="path-counter-store", data=0),  # monotonic counter for path names
+        dcc.Store(id="path-counter-store", data=0),
+        dcc.Store(id="cursor-state", data="idle"),   # <-- AJOUTÉ
 
     ], style={
         "flex": "0 0 280px",
