@@ -1,12 +1,21 @@
 import uuid
 import time
+import random
 from typing import Optional
 
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from compute_optimization_path import compute_optimization_path
-from constants import DEFAULT_PATH_COLOR
+# DEFAULT_PATH_COLOR is no longer used here, but kept for other modules
+
+
+def random_color() -> str:
+    """Generate a random hex color string like '#RRGGBB'."""
+    r = random.randint(0, 255)
+    g = random.randint(0, 255)
+    b = random.randint(0, 255)
+    return f"#{r:02x}{g:02x}{b:02x}"
 
 
 def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
@@ -78,7 +87,7 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         new_path = {
             "id": str(uuid.uuid4()),
             "name": f"Path {new_counter}",
-            "color": DEFAULT_PATH_COLOR,
+            "color": random_color(),          # <-- random color assigned here
             "visible": True,
             "data": {
                 "x": path[:, 0].tolist(),
