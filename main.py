@@ -27,7 +27,7 @@ optimizers = {
 
 if __name__ == "__main__":
     app = Dash(__name__)
-    default_sample_number = 100
+    default_sample_number = 10
     app.layout = generate_layout(loss_functions, optimizers, default_sample_number)
     register_callbacks(app, loss_functions, optimizers, default_sample_number)
 
