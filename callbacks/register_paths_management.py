@@ -34,8 +34,6 @@ def _path_row(path: dict) -> html.Div:
                 value=path["name"],
                 style={"width": "110px", "marginRight": "6px"},
             ),
-            # dcc.Input does not support type="color"; use a text field for
-            # the hex value paired with a coloured swatch for visual feedback.
             dcc.Input(
                 id={"type": "path-color", "index": path_id},
                 type="text",
@@ -149,9 +147,6 @@ def _register_update_path_color(app) -> None:
         changed_id = trigger["index"]
         new_color = ctx.triggered[0]["value"]
 
-        # Only commit to the store when the typed value is a complete, valid
-        # hex colour.  While the user is mid-typing (e.g. "#e6") we leave
-        # the store — and therefore the 3-D traces — unchanged.
         if not _is_valid_hex(new_color):
             raise PreventUpdate
 
@@ -160,8 +155,6 @@ def _register_update_path_color(app) -> None:
             for p in current_paths
         ]
 
-    # Update the swatch background immediately on every keystroke so the user
-    # gets live feedback even before the full hex string is valid.
     @app.callback(
         Output({"type": "path-color-swatch", "index": dash.dependencies.MATCH}, "style"),
         Input({"type": "path-color", "index": dash.dependencies.MATCH}, "value"),
@@ -241,22 +234,26 @@ def _register_update_figure_from_paths(app) -> None:
         Input("paths-store", "data"),
         Input("landscape-visible-store", "data"),
         State("surface", "figure"),
+        State("surface", "relayoutData"),  # <-- added to preserve camera
         prevent_initial_call=True,
     )
-    def update_figure_from_paths(paths, landscape_visible, current_figure):
+    def update_figure_from_paths(paths, landscape_visible, current_figure, relayoutData):
         if current_figure is None:
             raise PreventUpdate
 
         new_figure = copy.deepcopy(current_figure)
 
+        # Preserve camera position if the user has rotated/zoomed the view
+        if relayoutData and "scene.camera" in relayoutData:
+            new_figure["layout"]["scene"]["camera"] = relayoutData["scene.camera"]
+
         # Separate the landscape trace from path traces
         landscape_trace = None
-        new_data = []
         for trace in new_figure["data"]:
             if trace.get("name") == LOSS_LANDSCAPE_TRACE_NAME:
                 landscape_trace = trace
-            # Drop all non-landscape traces; they will be re-added below
 
+        new_data = []
         if landscape_trace is not None:
             landscape_trace["visible"] = (landscape_visible == LANDSCAPE_SHOW)
             new_data.append(landscape_trace)

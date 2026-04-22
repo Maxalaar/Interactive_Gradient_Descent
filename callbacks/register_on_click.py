@@ -11,12 +11,9 @@ from constants import DEFAULT_PATH_COLOR
 
 def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
     @app.callback(
-        Output("surface", "figure", allow_duplicate=True),
         Output("paths-store", "data", allow_duplicate=True),
         Output("last-click-time", "data", allow_duplicate=True),
         Input("surface", "clickData"),
-        State("surface", "figure"),
-        State("surface", "relayoutData"),
         State("loss-name", "data"),
         State("optimizer-name", "value"),
         State("learning-rate", "value"),
@@ -27,8 +24,6 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
     )
     def on_click(
         clickData,
-        figure,
-        relayoutData,
         loss_name: Optional[str],
         optimizer_name: str,
         learning_rate,
@@ -67,9 +62,6 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
             iteration_number=iterations,
         )
 
-        if relayoutData and "scene.camera" in relayoutData:
-            figure["layout"]["scene"]["camera"] = relayoutData["scene.camera"]
-
         new_path = {
             "id": str(uuid.uuid4()),
             "name": f"Path {len(current_paths or []) + 1}",
@@ -83,4 +75,4 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         }
 
         updated_paths = list(current_paths or []) + [new_path]
-        return figure, updated_paths, now
+        return updated_paths, now
