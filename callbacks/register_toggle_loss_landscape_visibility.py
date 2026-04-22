@@ -1,6 +1,8 @@
 from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
 
 from constants import LANDSCAPE_SHOW
+from preserve_camera_state import preserve_camera_state
 
 
 def register_toggle_loss_landscape_visibility(app) -> None:
@@ -12,10 +14,11 @@ def register_toggle_loss_landscape_visibility(app) -> None:
         State("surface", "relayoutData"),
         prevent_initial_call='initial_duplicate',
     )
-    def toggle_landscape_visibility(toggle_value, figure, relayoutData):
-        if relayoutData and "scene.camera" in relayoutData:
-            figure["layout"]["scene"]["camera"] = relayoutData["scene.camera"]
+    def toggle_landscape_visibility(toggle_value: list, figure: dict, relayoutData: dict | None) -> tuple:
+        if figure is None:
+            raise PreventUpdate
 
-        landscape_visible_store = LANDSCAPE_SHOW if toggle_value and LANDSCAPE_SHOW in toggle_value else ""
+        preserve_camera_state(figure, relayoutData)
 
-        return figure, landscape_visible_store
+        landscape_visible = LANDSCAPE_SHOW if (toggle_value and LANDSCAPE_SHOW in toggle_value) else ""
+        return figure, landscape_visible
