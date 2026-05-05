@@ -1,5 +1,4 @@
 from dash import dcc, html
-
 from constants import (
     LANDSCAPE_SHOW,
     LANDSCAPE_VISIBLE_STORE_ID,
@@ -36,36 +35,29 @@ def create_options_panel(
                 style={"marginBottom": "10px"},
             ),
 
-            # Custom expression editor — hidden unless "Custom" is selected
-            html.Div(
-                id="custom-loss-editor",
-                children=[
-                    html.Label(
-                        "f(x, y) =",
-                        style={"fontSize": "12px", "fontWeight": "bold",
-                               "marginBottom": "4px", "display": "block"},
-                    ),
-                    dcc.Textarea(
-                        id="custom-loss-expression",
-                        value="x**2 + y**2",
-                        placeholder="e.g.  sin(x) * cos(y) + x**2 / 4",
-                        style={
-                            "width": "100%", "height": "60px",
-                            "fontFamily": "monospace", "fontSize": "12px",
-                            "resize": "vertical", "boxSizing": "border-box",
-                            "border": "1px solid #ccc", "borderRadius": "4px",
-                            "padding": "4px 6px",
-                        },
-                    ),
-                    html.Div(
-                        _EXPRESSION_HINT,
-                        style={"fontSize": "10px", "color": "#888",
-                               "marginTop": "3px"},
-                    ),
-                    html.Div(id="custom-loss-status", style={"marginTop": "4px"}),
-                ],
-                style={"display": "none", "marginBottom": "10px"},
+            # ── Always‑visible expression editor ───────────────────────
+            html.Label(
+                "Expression (editable)", id="expression-label",
+                style={"fontSize": "12px", "fontWeight": "bold",
+                       "marginBottom": "4px", "display": "block"},
             ),
+            dcc.Textarea(
+                id="function-expression",
+                # Value will be filled by a callback
+                placeholder="Expression appears here",
+                style={
+                    "width": "100%", "height": "80px",
+                    "fontFamily": "monospace", "fontSize": "12px",
+                    "resize": "vertical", "boxSizing": "border-box",
+                    "border": "1px solid #ccc", "borderRadius": "4px",
+                    "padding": "4px 6px",
+                },
+            ),
+            html.Div(
+                _EXPRESSION_HINT,
+                style={"fontSize": "10px", "color": "#888", "marginTop": "3px"},
+            ),
+            html.Div(id="custom-loss-status", style={"marginTop": "4px"}),
 
             html.Label("X Range:", style={"fontWeight": "bold"}),
             html.Div([
@@ -180,6 +172,8 @@ def create_options_panel(
         dcc.Store(id="last-click-time", data=0),
         dcc.Store(id="path-counter-store", data=0),
         dcc.Store(id="cursor-state", data="idle"),
+        # Store to prevent feedback loops
+        dcc.Store(id="suppress-expression-sync", data=False),
 
     ], style={
         "flex": "0 0 280px",

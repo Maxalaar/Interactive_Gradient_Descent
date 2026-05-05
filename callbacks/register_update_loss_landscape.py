@@ -13,6 +13,7 @@ _STATUS_BASE = {
 }
 _STATUS_ERROR   = {**_STATUS_BASE, "backgroundColor": "#f8d7da", "color": "#721c24"}
 _STATUS_HIDDEN  = {"display": "none"}
+_STATUS_SUCCESS = {**_STATUS_BASE, "backgroundColor": "#d4edda", "color": "#155724"}
 
 
 def register_update_loss_landscape(app, loss_functions: dict, default_sample_number: int) -> None:
@@ -22,8 +23,9 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
             Output("paths-store", "data", allow_duplicate=True),
             Output("loss-name", "data"),
             Output("path-counter-store", "data", allow_duplicate=True),
-            Output("custom-loss-status", "children"),
-            Output("custom-loss-status", "style"),
+            Output("custom-loss-status", "children", allow_duplicate=True),
+            Output("custom-loss-status", "style", allow_duplicate=True),
+            Output("loss-function-dropdown", "value", allow_duplicate=True),
         ],
         inputs=[
             Input("update-loss-landscape-button", "n_clicks"),
@@ -37,33 +39,48 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
             State("surface", "figure"),
             State("paths-store", "data"),
             State("loss-name", "data"),
-            State("custom-loss-expression", "value"),
+            State("function-expression", "value"),
         ],
         running=[(Output("cursor-state", "data"), "busy", "idle")],
         prevent_initial_call=True,
     )
     def update_landscape(
-            n_clicks, loss_name, x_min, x_max, y_min, y_max,
+            n_clicks, selected_loss_name, x_min, x_max, y_min, y_max,
             sample_number, toggle_value, current_figure, current_paths,
-            stored_loss_name, custom_expression,
+            stored_loss_name, expression_in_editor,
     ):
-        if loss_name is None:
+        if selected_loss_name is None:
             raise PreventUpdate
 
-        # ── Validate & apply custom expression before anything else ─────
-        if loss_name == "Custom":
-            custom_fn = loss_functions["Custom"]
-            expr = (custom_expression or "").strip() or "x**2 + y**2"
-            error = custom_fn.validate(expr)
+        # 1. Determine if the expression has been edited
+        raw_expr = (expression_in_editor or "").strip()
+        selected_func = loss_functions[selected_loss_name]
+        original_expr = selected_func.get_expression()
+        expression_changed = (raw_expr != original_expr)
+
+        target_loss_name = selected_loss_name
+        custom_func = loss_functions["Custom"]
+        dropdown_update = no_update
+        status_msg = ""
+        status_style = _STATUS_HIDDEN
+
+        if expression_changed:
+            # Validate the edited expression
+            error = custom_func.validate(raw_expr)
             if error:
                 return (
                     no_update, no_update, no_update, no_update,
-                    f"✖ {error}", _STATUS_ERROR,
+                    f"✖ {error}", _STATUS_ERROR, no_update,
                 )
-            custom_fn.set_expression(expr)
+            # Apply the new expression to the custom function
+            custom_func.set_expression(raw_expr)
+            target_loss_name = "Custom"
+            dropdown_update = "Custom"
+            status_msg = "✓ Switched to Custom function with your expression"
+            status_style = _STATUS_SUCCESS
 
-        # ── Normal landscape computation ────────────────────────────────
-        loss_func = loss_functions[loss_name]
+        # 2. Use the determined loss function
+        loss_func = loss_functions[target_loss_name]
         sample_number = sample_number or default_sample_number
         default_range = loss_func.get_parameter_range()
 
@@ -78,12 +95,17 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
             else default_range
         )
 
+        # Compute landscape
         X, Y, Z = compute_loss_landscape(loss_func, sample_number, [x_min, x_max], [y_min, y_max])
         z_min, z_max = float(Z.min()), float(Z.max())
         padding = (z_max - z_min) * 0.05
 
-        # Same function — update in-place, keep paths & camera
-        if current_figure is not None and stored_loss_name == loss_name:
+        # 3. Decide whether we can update in-place or must rebuild (clearing paths)
+        # Rebuild if: function name changed OR expression changed (even if name same)
+        must_rebuild = (stored_loss_name != target_loss_name) or expression_changed
+
+        if not must_rebuild and current_figure is not None:
+            # Same function, no change in expression → update trace in-place, keep paths
             updated_figure = copy.deepcopy(current_figure)
             preserve_camera_state(updated_figure, callback_context.inputs.get("surface.relayoutData"))
 
@@ -95,19 +117,36 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
             updated_figure["layout"]["scene"]["xaxis"]["range"] = [x_min, x_max]
             updated_figure["layout"]["scene"]["yaxis"]["range"] = [y_min, y_max]
             updated_figure["layout"]["scene"]["zaxis"]["range"] = [z_min - padding, z_max + padding]
-            return updated_figure, no_update, stored_loss_name, no_update, "", _STATUS_HIDDEN
 
-        # New function — rebuild, clear paths
-        figure = build_surface(X, Y, Z).to_dict()
-        preserve_camera_state(figure, callback_context.inputs.get("surface.relayoutData"))
+            return (
+                updated_figure,
+                no_update,      # keep existing paths
+                target_loss_name,
+                no_update,      # keep path counter
+                status_msg,
+                status_style,
+                dropdown_update,
+            )
+        else:
+            # Rebuild figure and clear all paths
+            figure = build_surface(X, Y, Z).to_dict()
+            preserve_camera_state(figure, callback_context.inputs.get("surface.relayoutData"))
 
-        figure["layout"]["scene"]["xaxis"]["range"] = [x_min, x_max]
-        figure["layout"]["scene"]["yaxis"]["range"] = [y_min, y_max]
-        figure["layout"]["scene"]["zaxis"]["range"] = [z_min - padding, z_max + padding]
+            figure["layout"]["scene"]["xaxis"]["range"] = [x_min, x_max]
+            figure["layout"]["scene"]["yaxis"]["range"] = [y_min, y_max]
+            figure["layout"]["scene"]["zaxis"]["range"] = [z_min - padding, z_max + padding]
 
-        for trace in figure["data"]:
-            if trace.get("name") == LOSS_LANDSCAPE_TRACE_NAME:
-                trace["visible"] = True
-                break
+            for trace in figure["data"]:
+                if trace.get("name") == LOSS_LANDSCAPE_TRACE_NAME:
+                    trace["visible"] = True
+                    break
 
-        return figure, [], loss_name, 0, "", _STATUS_HIDDEN
+            return (
+                figure,
+                [],                     # clear paths
+                target_loss_name,
+                0,                      # reset path counter
+                status_msg,
+                status_style,
+                dropdown_update,
+            )
