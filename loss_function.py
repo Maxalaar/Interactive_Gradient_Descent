@@ -179,3 +179,68 @@ class Eggholder(LossFunction):
         term1 = -(y + 47) * torch.sin(torch.sqrt(torch.abs(y + x / 2 + 47)))
         term2 = -x * torch.sin(torch.sqrt(torch.abs(x - (y + 47))))
         return term1 + term2
+
+
+class CustomLossFunction(LossFunction):
+    """
+    User-defined loss function evaluated from a string expression.
+
+    The expression may use ``x``, ``y`` and the safe symbols listed in
+    ``_SAFE_NAMESPACE`` (torch ops, trig, exp, log, pi, e …).
+    """
+
+    _SAFE_NAMESPACE: dict = {
+        "__builtins__": {},
+        "abs":   torch.abs,
+        "sqrt":  torch.sqrt,
+        "exp":   torch.exp,
+        "log":   torch.log,
+        "sin":   torch.sin,
+        "cos":   torch.cos,
+        "tan":   torch.tan,
+        "sinh":  torch.sinh,
+        "cosh":  torch.cosh,
+        "tanh":  torch.tanh,
+        "pi":    np.pi,
+        "e":     np.e,
+        "torch": torch,
+    }
+
+    def __init__(self, expression: str = "x**2 + y**2") -> None:
+        super().__init__()
+        self.name = "Custom Function"
+        self.parameter_range = [-5.0, 5.0]
+        self.expression = expression
+
+    # ------------------------------------------------------------------
+    # Mutation helpers (called from callbacks on the shared instance)
+    # ------------------------------------------------------------------
+
+    def set_expression(self, expression: str) -> None:
+        self.expression = expression
+
+    def set_parameter_range(self, lo: float, hi: float) -> None:
+        self.parameter_range = [lo, hi]
+
+    def validate(self, expression: str) -> str | None:
+        """
+        Try to evaluate the expression at a dummy point.
+        Returns an error string on failure, or None on success.
+        """
+        try:
+            x = torch.tensor(0.5, dtype=torch.float32)
+            y = torch.tensor(0.5, dtype=torch.float32)
+            ns = {"x": x, "y": y, **self._SAFE_NAMESPACE}
+            result = eval(expression, {"__builtins__": {}}, ns)  # noqa: S307
+            # Must be a scalar-ish tensor
+            float(result)
+        except Exception as exc:
+            return str(exc)
+        return None
+
+    # ------------------------------------------------------------------
+
+    def __call__(self, parameters: torch.Tensor) -> torch.Tensor:
+        x, y = parameters[0], parameters[1]
+        ns = {"x": x, "y": y, **self._SAFE_NAMESPACE}
+        return eval(self.expression, {"__builtins__": {}}, ns)  # noqa: S307

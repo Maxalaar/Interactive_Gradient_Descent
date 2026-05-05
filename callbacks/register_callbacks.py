@@ -1,3 +1,4 @@
+from callbacks.register_custom_loss import register_custom_loss
 from callbacks.register_on_click import register_on_click
 from callbacks.register_random_start import register_random_start
 from callbacks.register_sync_loss_function_defaults import register_sync_loss_function_defaults
@@ -16,3 +17,4 @@ def register_callbacks(app, loss_functions, optimizers, default_sample_number):
     register_paths_management(app)
     register_cursor_management(app)
     register_random_start(app, loss_functions, optimizers)
+    register_custom_loss(app, loss_functions)
