@@ -1,4 +1,5 @@
 from callbacks.register_on_click import register_on_click
+from callbacks.register_random_start import register_random_start
 from callbacks.register_sync_loss_function_defaults import register_sync_loss_function_defaults
 from callbacks.register_sync_optimizer_defaults import register_sync_optimizer_defaults
 from callbacks.register_toggle_loss_landscape_visibility import register_toggle_loss_landscape_visibility
@@ -14,3 +15,4 @@ def register_callbacks(app, loss_functions, optimizers, default_sample_number):
     register_toggle_loss_landscape_visibility(app)
     register_paths_management(app)
     register_cursor_management(app)
+    register_random_start(app, loss_functions, optimizers)

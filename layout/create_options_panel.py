@@ -111,7 +111,17 @@ def create_options_panel(
         html.Div([
             html.H4("Optimization Paths",
                     style={"marginTop": "10px", "marginBottom": "5px"}),
-            html.Div(id="paths-list", children=[]),
+            html.Button(
+                "Random Start",
+                id="random-start-button",
+                n_clicks=0,
+                style={
+                    "backgroundColor": "#28a745", "color": "white",
+                    "border": "none", "padding": "4px 8px",
+                    "borderRadius": "4px", "cursor": "pointer",
+                    "fontSize": "12px", "width": "100%", "marginTop": "5px",
+                },
+            ),
             html.Button(
                 "Clear All Paths",
                 id="clear-paths-button",
@@ -121,8 +131,10 @@ def create_options_panel(
                     "border": "none", "padding": "4px 8px",
                     "borderRadius": "4px", "cursor": "pointer",
                     "fontSize": "12px", "width": "100%", "marginTop": "10px",
+                    "marginBottom": "5px",
                 },
             ),
+            html.Div(id="paths-list", children=[]),
         ], style=_card_style()),
 
         # ── Stores ──────────────────────────────────────────────────────
