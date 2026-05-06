@@ -38,7 +38,7 @@ def create_options_panel(
 
             # ── Always‑visible expression editor ───────────────────────
             html.Label(
-                "Expression (editable)", id="expression-label",
+                "Expression", id="expression-label",
                 style={"fontSize": "12px", "fontWeight": "bold",
                        "marginBottom": "4px", "display": "block"},
             ),

@@ -72,12 +72,11 @@ def register_update_loss_landscape(app, loss_functions: dict, default_sample_num
                     no_update, no_update, no_update, no_update,
                     f"✖ {error}", _STATUS_ERROR, no_update,
                 )
-            # Apply the new expression to the custom function
+            # Apply the new expression to the custom function (silent success)
             custom_func.set_expression(raw_expr)
             target_loss_name = "Custom"
             dropdown_update = "Custom"
-            status_msg = "✓ Switched to Custom function with your expression"
-            status_style = _STATUS_SUCCESS
+            # No success message – the div remains hidden
 
         # 2. Use the determined loss function
         loss_func = loss_functions[target_loss_name]

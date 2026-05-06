@@ -87,7 +87,7 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         new_path = {
             "id": str(uuid.uuid4()),
             "name": f"Path {new_counter}",
-            "color": random_color(),          # <-- random color assigned here
+            "color": random_color(),
             "visible": True,
             "data": {
                 "x": path[:, 0].tolist(),
