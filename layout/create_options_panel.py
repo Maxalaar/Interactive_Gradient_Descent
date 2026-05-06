@@ -3,7 +3,6 @@ from constants import (
     LANDSCAPE_SHOW,
     LANDSCAPE_VISIBLE_STORE_ID,
     LOSS_NAME_STORE_ID,
-    PATHS_STORE_ID,
 )
 
 _EXPRESSION_HINT = (
@@ -21,7 +20,6 @@ def create_options_panel(
     first_optimizer,
     initial_expression: str,
 ) -> html.Div:
-
     return html.Div([
 
         # ── Loss landscape ──────────────────────────────────────────────
@@ -125,48 +123,14 @@ def create_options_panel(
                 style={"width": "100px", "marginBottom": "15px"},
             ),
 
-            # Dynamic container for hyperparameters (learning_rate, momentum, betas, ...)
+            # Dynamic container for hyperparameters
             html.Div(id="optimizer-params-container"),
         ], style=_card_style()),
 
-        # ── Paths management ────────────────────────────────────────────
-        html.Div([
-            html.H4("Optimization Paths",
-                    style={"marginTop": "10px", "marginBottom": "5px"}),
-            html.Button(
-                "Random Start",
-                id="random-start-button",
-                n_clicks=0,
-                style={
-                    "backgroundColor": "#28a745", "color": "white",
-                    "border": "none", "padding": "4px 8px",
-                    "borderRadius": "4px", "cursor": "pointer",
-                    "fontSize": "12px", "width": "100%", "marginTop": "5px",
-                },
-            ),
-            html.Button(
-                "Clear All Paths",
-                id="clear-paths-button",
-                n_clicks=0,
-                style={
-                    "backgroundColor": "#dc3545", "color": "white",
-                    "border": "none", "padding": "4px 8px",
-                    "borderRadius": "4px", "cursor": "pointer",
-                    "fontSize": "12px", "width": "100%", "marginTop": "10px",
-                    "marginBottom": "5px",
-                },
-            ),
-            html.Div(id="paths-list", children=[]),
-        ], style=_card_style()),
-
-        # ── Stores ──────────────────────────────────────────────────────
-        dcc.Store(id=PATHS_STORE_ID, data=[]),
+        # ── Stores (conservés) ──────────────────────────────────────────
         dcc.Store(id=LANDSCAPE_VISIBLE_STORE_ID, data=LANDSCAPE_SHOW),
         dcc.Store(id=LOSS_NAME_STORE_ID, data=first_function_name),
-        dcc.Store(id="last-click-time", data=0),
-        dcc.Store(id="path-counter-store", data=0),
-        dcc.Store(id="cursor-state", data="idle"),
-        dcc.Store(id="optimizer-hyperparams", data={}),          # new store
+        dcc.Store(id="optimizer-hyperparams", data={}),
         dcc.Store(id="suppress-expression-sync", data=False),
     ], style={
         "flex": "0 0 280px",
@@ -174,7 +138,6 @@ def create_options_panel(
         "marginRight": "10px",
         "overflowY": "auto",
     })
-
 
 def _card_style() -> dict:
     return {

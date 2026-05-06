@@ -3,6 +3,7 @@ from dash import html
 from create_loss_landscape_figure import create_loss_landscape_figure
 from layout.create_graphs_panel import create_graphs_panel
 from layout.create_options_panel import create_options_panel
+from layout.create_paths_panel import create_paths_panel   # Nouvelle importation
 
 def generate_layout(loss_functions, optimizers, default_sample_number):
     first_function_name = list(loss_functions.keys())[0]
@@ -30,6 +31,7 @@ def generate_layout(loss_functions, optimizers, default_sample_number):
         initial_expression
     )
     graphs_panel = create_graphs_panel(initial_figure)
+    paths_panel = create_paths_panel()   # Nouveau panneau
 
     layout = html.Div([
         html.Div(style={
@@ -45,8 +47,9 @@ def generate_layout(loss_functions, optimizers, default_sample_number):
             'overflow': 'hidden',
         }, children=[
             html.Div([
-                options_panel,
-                graphs_panel,
+                options_panel,  # ← paramètres au milieu
+                graphs_panel,     # ← graphique à droite
+                paths_panel,  # ← panneau des chemins à gauche
             ], style={
                 'display': 'flex',
                 'flexDirection': 'row',
