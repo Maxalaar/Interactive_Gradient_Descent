@@ -8,6 +8,7 @@ def generate_layout(loss_functions, optimizers, default_sample_number):
     first_function_name = list(loss_functions.keys())[0]
     first_function = loss_functions[first_function_name]
     default_range = first_function.get_parameter_range()
+    initial_expression = first_function.get_expression()
 
     initial_figure = create_loss_landscape_figure(
         loss_function=first_function,
@@ -25,7 +26,8 @@ def generate_layout(loss_functions, optimizers, default_sample_number):
     options_panel = create_options_panel(
         loss_functions, optimizers, default_sample_number,
         first_function_name, default_range,
-        first_optimizer_name, first_optimizer
+        first_optimizer_name, first_optimizer,
+        initial_expression
     )
     graphs_panel = create_graphs_panel(initial_figure)
 

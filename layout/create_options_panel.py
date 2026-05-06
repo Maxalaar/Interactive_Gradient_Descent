@@ -20,6 +20,7 @@ def create_options_panel(
     default_range: list,
     first_optimizer_name: str,
     first_optimizer,
+    initial_expression: str,
 ) -> html.Div:
 
     return html.Div([
@@ -43,8 +44,8 @@ def create_options_panel(
             ),
             dcc.Textarea(
                 id="function-expression",
-                # Value will be filled by a callback
-                placeholder="Expression appears here",
+                value=initial_expression,
+                placeholder=initial_expression,
                 style={
                     "width": "100%", "height": "80px",
                     "fontFamily": "monospace", "fontSize": "12px",
