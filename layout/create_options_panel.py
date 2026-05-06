@@ -11,7 +11,6 @@ _EXPRESSION_HINT = (
     "exp, log, sqrt, abs, pi, e, torch.*"
 )
 
-
 def create_options_panel(
     loss_functions: dict,
     optimizers: dict,
@@ -36,7 +35,6 @@ def create_options_panel(
                 style={"marginBottom": "10px"},
             ),
 
-            # ── Always‑visible expression editor ───────────────────────
             html.Label(
                 "Expression", id="expression-label",
                 style={"fontSize": "12px", "fontWeight": "bold",
@@ -110,7 +108,7 @@ def create_options_panel(
 
         # ── Optimiser settings ──────────────────────────────────────────
         html.Div([
-            html.Label("Optimizer:", style={"fontWeight": "bold"}),
+            html.Label("Optimizer", style={"fontWeight": "bold"}),
             dcc.Dropdown(
                 id="optimizer-name",
                 options=[{"label": n, "value": n} for n in optimizers],
@@ -119,21 +117,16 @@ def create_options_panel(
                 style={"marginBottom": "15px"},
             ),
 
-            html.Label("Learning Rate:", style={"fontWeight": "bold"}),
-            dcc.Input(
-                id="learning-rate",
-                type="number",
-                value=first_optimizer.get_default_lr(),
-                style={"width": "100px", "marginBottom": "15px"},
-            ),
-
-            html.Label("Iterations:", style={"fontWeight": "bold"}),
+            html.Label("Iterations", style={"fontWeight": "bold", "display": "block"}),
             dcc.Input(
                 id="iterations",
                 type="number",
                 value=first_optimizer.get_default_iterations(),
                 style={"width": "100px", "marginBottom": "15px"},
             ),
+
+            # Dynamic container for hyperparameters (learning_rate, momentum, betas, ...)
+            html.Div(id="optimizer-params-container"),
         ], style=_card_style()),
 
         # ── Paths management ────────────────────────────────────────────
@@ -173,9 +166,8 @@ def create_options_panel(
         dcc.Store(id="last-click-time", data=0),
         dcc.Store(id="path-counter-store", data=0),
         dcc.Store(id="cursor-state", data="idle"),
-        # Store to prevent feedback loops
+        dcc.Store(id="optimizer-hyperparams", data={}),          # new store
         dcc.Store(id="suppress-expression-sync", data=False),
-
     ], style={
         "flex": "0 0 280px",
         "padding": "10px",

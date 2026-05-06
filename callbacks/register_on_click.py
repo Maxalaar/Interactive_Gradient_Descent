@@ -7,11 +7,9 @@ from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from compute_optimization_path import compute_optimization_path
-# DEFAULT_PATH_COLOR is no longer used here, but kept for other modules
 
 
 def random_color() -> str:
-    """Generate a random hex color string like '#RRGGBB'."""
     r = random.randint(0, 255)
     g = random.randint(0, 255)
     b = random.randint(0, 255)
@@ -30,23 +28,20 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
             Input("surface", "clickData"),
             State("loss-name", "data"),
             State("optimizer-name", "value"),
-            State("learning-rate", "value"),
+            State("optimizer-hyperparams", "data"),
             State("iterations", "value"),
             State("paths-store", "data"),
             State("last-click-time", "data"),
             State("path-counter-store", "data"),
         ],
-        running=[
-            (Output("cursor-state", "data"), "busy", "idle")
-        ],
-        # background=True,
+        running=[(Output("cursor-state", "data"), "busy", "idle")],
         prevent_initial_call=True,
     )
     def on_click(
         clickData,
         loss_name: Optional[str],
         optimizer_name: str,
-        learning_rate,
+        hyperparams: dict,
         iterations,
         current_paths,
         last_click_time,
@@ -65,10 +60,8 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
         x0 = clickData["points"][0]["x"]
         y0 = clickData["points"][0]["y"]
 
-        if not isinstance(learning_rate, (int, float)) or learning_rate <= 0:
-            learning_rate = optimizer.get_default_lr()
-        else:
-            learning_rate = float(learning_rate)
+        if not hyperparams:
+            hyperparams = optimizer.get_hyperparameter_defaults()
 
         if iterations is None or iterations < 1:
             iterations = optimizer.get_default_iterations()
@@ -79,7 +72,7 @@ def register_on_click(app, loss_functions: dict, optimizers: dict) -> None:
             loss_function,
             start_parameters=[x0, y0],
             optimizer=optimizer,
-            learning_rate=learning_rate,
+            hyperparams=hyperparams,
             iteration_number=iterations,
         )
 

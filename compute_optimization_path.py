@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from typing import List
+from typing import List, Dict, Any
 
 from loss_function import LossFunction
 from optimizer import Optimizer
@@ -10,26 +10,24 @@ def compute_optimization_path(
     loss_function: LossFunction,
     start_parameters: List[float],
     optimizer: Optimizer,
-    learning_rate: float,
+    hyperparams: Dict[str, Any],
     iteration_number: int,
 ) -> np.ndarray:
     """
-    Run gradient-based optimisation from ``start_parameters`` and return the
-    full trajectory.
+    Run gradient-based optimisation from ``start_parameters``.
 
     Args:
-        loss_function:     LossFunction instance to minimise.
-        start_parameters:  ``[x0, y0]`` starting point.
-        optimizer:         Optimizer instance that creates the PyTorch optimiser.
-        learning_rate:     Step size passed to the optimiser.
-        iteration_number:  Number of gradient steps to take.
+        loss_function:     LossFunction instance.
+        start_parameters:  [x0, y0].
+        optimizer:         Optimizer instance.
+        hyperparams:       Dict of hyperparameters (learning_rate, momentum, etc.)
+        iteration_number:  Number of gradient steps.
 
     Returns:
-        NumPy array of shape ``(iteration_number + 1, 3)`` where each row is
-        ``[x, y, loss]``.  Row 0 is the starting point.
+        Array of shape (iteration_number + 1, 3): [x, y, loss].
     """
     parameters = torch.tensor(start_parameters, dtype=torch.float32, requires_grad=True)
-    optimizer_instance = optimizer.create_optimizer([parameters], lr=learning_rate)
+    optimizer_instance = optimizer.create_optimizer([parameters], hyperparams)
     path: List[List[float]] = []
 
     def record() -> None:

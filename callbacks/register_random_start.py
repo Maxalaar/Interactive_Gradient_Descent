@@ -17,7 +17,7 @@ def register_random_start(app, loss_functions, optimizers):
             State("surface", "figure"),
             State("loss-name", "data"),
             State("optimizer-name", "value"),
-            State("learning-rate", "value"),
+            State("optimizer-hyperparams", "data"),
             State("iterations", "value"),
             State("paths-store", "data"),
             State("path-counter-store", "data"),
@@ -34,7 +34,7 @@ def register_random_start(app, loss_functions, optimizers):
         figure,
         loss_name,
         optimizer_name,
-        learning_rate,
+        hyperparams,
         iterations,
         current_paths,
         path_counter,
@@ -46,8 +46,7 @@ def register_random_start(app, loss_functions, optimizers):
         if not n_clicks or loss_name is None:
             raise PreventUpdate
 
-        # 1. Récupérer la zone affichée (axes X et Y)
-        # On tente de lire les ranges depuis la figure (zoom utilisateur)
+        # Récupérer la zone visible
         if figure and "layout" in figure and "scene" in figure["layout"]:
             x_axis = figure["layout"]["scene"].get("xaxis", {})
             y_axis = figure["layout"]["scene"].get("yaxis", {})
@@ -56,7 +55,6 @@ def register_random_start(app, loss_functions, optimizers):
         else:
             x_range = y_range = None
 
-        # Fallback sur les valeurs des champs input si les ranges ne sont pas définis
         if not x_range or len(x_range) != 2:
             x_min = x_min_input if x_min_input is not None else -5.0
             x_max = x_max_input if x_max_input is not None else 5.0
@@ -66,34 +64,28 @@ def register_random_start(app, loss_functions, optimizers):
             y_max = y_max_input if y_max_input is not None else 5.0
             y_range = (y_min, y_max)
 
-        # 2. Générer un point aléatoire uniforme dans le rectangle
         x0 = random.uniform(x_range[0], x_range[1])
         y0 = random.uniform(y_range[0], y_range[1])
 
-        # 3. Paramètres d'optimisation
         loss_function = loss_functions[loss_name]
         optimizer = optimizers[optimizer_name]
 
-        if not isinstance(learning_rate, (int, float)) or learning_rate <= 0:
-            learning_rate = optimizer.get_default_lr()
-        else:
-            learning_rate = float(learning_rate)
+        if not hyperparams:
+            hyperparams = optimizer.get_hyperparameter_defaults()
 
         if iterations is None or iterations < 1:
             iterations = optimizer.get_default_iterations()
         else:
             iterations = int(iterations)
 
-        # 4. Calcul de la trajectoire
         path = compute_optimization_path(
             loss_function,
             start_parameters=[x0, y0],
             optimizer=optimizer,
-            learning_rate=learning_rate,
+            hyperparams=hyperparams,
             iteration_number=iterations,
         )
 
-        # 5. Créer l'entrée du chemin
         def random_color():
             r = random.randint(0, 255)
             g = random.randint(0, 255)
