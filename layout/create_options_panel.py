@@ -89,9 +89,21 @@ def create_options_panel(
                     "backgroundColor": "#007bff", "color": "white",
                     "border": "none", "padding": "8px 16px",
                     "borderRadius": "4px", "cursor": "pointer",
+                    "fontSize": "14px", "width": "100%", "marginBottom": "5px"
+                },
+            ),
+            html.Button(
+                "Download Surface Data",
+                id="download-surface-button",
+                n_clicks=0,
+                style={
+                    "backgroundColor": "#6c757d", "color": "white",
+                    "border": "none", "padding": "8px 16px",
+                    "borderRadius": "4px", "cursor": "pointer",
                     "fontSize": "14px", "width": "100%",
                 },
             ),
+            dcc.Download(id="download-surface-txt"),
         ], style=_card_style()),
 
         # ── Visibility toggle ───────────────────────────────────────────

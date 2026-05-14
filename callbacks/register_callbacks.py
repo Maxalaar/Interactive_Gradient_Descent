@@ -1,3 +1,4 @@
+from callbacks.register_download_surface_data import register_download_surface_data
 from callbacks.register_expression_management import register_expression_management
 from callbacks.register_on_click import register_on_click
 from callbacks.register_random_start import register_random_start
@@ -18,3 +19,4 @@ def register_callbacks(app, loss_functions, optimizers, default_sample_number):
     register_cursor_management(app)
     register_random_start(app, loss_functions, optimizers)
     register_expression_management(app, loss_functions)
+    register_download_surface_data(app, loss_functions)
