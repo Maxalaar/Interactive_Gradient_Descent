@@ -37,6 +37,8 @@ def create_paths_panel() -> html.Div:
         dcc.Store(id="last-click-time", data=0),
         dcc.Store(id="path-counter-store", data=0),
         dcc.Store(id="cursor-state", data="idle"),
+
+        dcc.Download(id="download-path-txt"),
     ], style={
         "flex": "0 0 280px",
         "padding": "10px",

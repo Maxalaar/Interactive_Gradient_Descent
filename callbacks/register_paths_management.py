@@ -47,6 +47,10 @@ def _build_path_row(path: Dict[str, Any]) -> html.Div:
         html.Button("✖", id={"type": "path-delete", "index": pid}, n_clicks=0,
                     style={"marginLeft": "6px", "backgroundColor": "#dc3545", "color": "white",
                            "border": "none", "borderRadius": "4px", "cursor": "pointer"}),
+        html.Button("⬇", id={"type": "download-path-button", "index": pid}, n_clicks=0,
+                    style={"marginLeft": "6px", "backgroundColor": "#6c757d", "color": "white",
+                           "border": "none", "borderRadius": "4px", "cursor": "pointer",
+                           "fontSize": "12px", "padding": "2px 6px"}),
     ], style={"display": "flex", "alignItems": "center", "marginBottom": "8px"})
 
 
@@ -206,3 +210,41 @@ def register_paths_management(app) -> None:
         # Return a new figure dict. Reusing current_figure["layout"] avoids
         # serializing layout props and camera state again.
         return {"data": new_data, "layout": current_figure["layout"]}
+
+
+    @app.callback(
+        Output("download-path-txt", "data"),
+        Input({"type": "download-path-button", "index": dash.dependencies.ALL}, "n_clicks"),
+        State("paths-store", "data"),
+        prevent_initial_call=True,
+    )
+    def download_path_data(n_clicks_list, paths):
+        if not paths or not any(n_clicks_list):
+            raise PreventUpdate
+
+        ctx = dash.callback_context
+        if not ctx.triggered:
+            raise PreventUpdate
+
+        trigger = ctx.triggered[0]
+        try:
+            trigger_id = json.loads(trigger["prop_id"].split(".")[0])
+            pid = trigger_id["index"]
+        except (json.JSONDecodeError, KeyError):
+            raise PreventUpdate
+
+        path = next((p for p in paths if p["id"] == pid), None)
+        if path is None or not path.get("data"):
+            raise PreventUpdate
+
+        data = path["data"]
+        lines = [
+            f"{x:.10g} {y:.10g} {z:.10g}"
+            for x, y, z in zip(data["x"], data["y"], data["z"])
+        ]
+        text = "\n".join(lines)
+
+        import base64
+        content_b64 = base64.b64encode(text.encode()).decode()
+        filename = f"path_{path.get('name', pid).replace(' ', '_')}.txt"
+        return {"content": content_b64, "filename": filename, "base64": True}
